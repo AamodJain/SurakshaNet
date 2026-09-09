@@ -1,5 +1,6 @@
 import { pipeline, env } from '@xenova/transformers';
 import { saveIncident } from './store.js';
+import { isAccountSetup } from './auth_manager.js';
 
 env.allowLocalModels = true;
 env.allowRemoteModels = false;
@@ -173,9 +174,17 @@ function enqueue(text, contact, windowId) {
   });
 }
 
-chrome.runtime.onInstalled.addListener((details) => {
+chrome.runtime.onInstalled.addListener(async (details) => {
   log('runtime:installed', { reason: details.reason });
   ensureModel().catch(() => {});
+  try {
+    const configured = await isAccountSetup();
+    if (!configured) {
+      chrome.tabs.create({ url: chrome.runtime.getURL('auth.html') });
+    }
+  } catch (e) {
+    logError('runtime:installed:auth-check-failed', e);
+  }
 });
 chrome.runtime.onStartup.addListener(() => {
   log('runtime:startup');

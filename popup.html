@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>SurakshaNet incident log</title>
+    <title>SurakshaNet Incident Log</title>
     <style>
       :root {
         color-scheme: light;
@@ -19,6 +19,8 @@
         --red-soft: #fde7e4;
         --amber: #a85f14;
         --amber-soft: #fff1dd;
+        --green: #1a7f37;
+        --green-soft: #dafbe1;
       }
 
       * {
@@ -51,13 +53,19 @@
         content: "";
       }
 
+      .eyebrow-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+
       .eyebrow {
         position: relative;
         z-index: 1;
         display: flex;
         align-items: center;
         gap: 7px;
-        margin-bottom: 13px;
         color: #ffb49c;
         font: 700 10px/1.2 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         letter-spacing: 0.13em;
@@ -71,6 +79,11 @@
         background: var(--accent);
         box-shadow: 0 0 0 4px rgba(241, 90, 36, 0.18);
         content: "";
+      }
+
+      .eyebrow.unlocked::before {
+        background: #3fb950;
+        box-shadow: 0 0 0 4px rgba(63, 185, 80, 0.2);
       }
 
       .brand {
@@ -114,11 +127,211 @@
         font-size: 11px;
       }
 
+      /* View Panes */
+      .view-pane {
+        display: block;
+      }
+
+      .view-pane.hidden {
+        display: none !important;
+      }
+
+      /* State Cards */
+      .state-card {
+        margin: 16px 16px 0;
+        padding: 20px 18px;
+        border-radius: 12px;
+        text-align: center;
+        background: var(--card);
+        border: 1px solid var(--line);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      }
+
+      .state-icon {
+        font-size: 32px;
+        margin-bottom: 10px;
+      }
+
+      .status-shield {
+        font-size: 36px;
+        margin-bottom: 8px;
+      }
+
+      .state-card h3 {
+        margin: 0 0 6px;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--ink);
+      }
+
+      .state-card p {
+        margin: 0 0 16px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .channel-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border-radius: 99px;
+        background: var(--green-soft);
+        color: var(--green);
+        font-size: 11px;
+        font-weight: 600;
+      }
+
+      .pulse-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--green);
+        box-shadow: 0 0 0 3px rgba(26, 127, 55, 0.25);
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+      }
+
+      .btn-primary {
+        width: 100%;
+        min-height: 42px;
+        padding: 10px 16px;
+        border: none;
+        border-radius: 9px;
+        background: var(--accent);
+        color: #fff;
+        font: 600 12px Inter, sans-serif;
+        cursor: pointer;
+        transition: background 150ms ease, transform 150ms ease;
+      }
+
+      .btn-primary:hover {
+        background: #d94917;
+      }
+
+      .btn-primary:active {
+        transform: translateY(1px);
+      }
+
+      /* Unlock Box in Locked View */
+      .unlock-box {
+        margin: 14px 16px 18px;
+        padding: 16px;
+        border-radius: 12px;
+        background: var(--card);
+        border: 1px solid var(--line);
+      }
+
+      .unlock-box h4 {
+        margin: 0 0 4px;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--ink);
+      }
+
+      .unlock-box p {
+        margin: 0 0 12px;
+        font-size: 11px;
+        color: var(--muted);
+      }
+
+      .unlock-input-row {
+        display: flex;
+        gap: 8px;
+      }
+
+      .unlock-input-row input {
+        flex: 1;
+        min-height: 38px;
+        padding: 6px 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        font: inherit;
+        font-size: 12px;
+        background: #fafaf9;
+      }
+
+      .unlock-input-row input:focus {
+        outline: none;
+        border-color: var(--accent);
+        background: #fff;
+      }
+
+      .btn-accent-sm {
+        min-height: 38px;
+        padding: 0 16px;
+        border: none;
+        border-radius: 8px;
+        background: var(--navy);
+        color: #fff;
+        font: 600 12px Inter, sans-serif;
+        cursor: pointer;
+        transition: background 150ms ease;
+      }
+
+      .btn-accent-sm:hover {
+        background: #333;
+      }
+
+      .error-text {
+        margin-top: 8px;
+        font-size: 11px;
+        color: var(--red);
+        font-weight: 600;
+      }
+
+      .error-text.hidden {
+        display: none;
+      }
+
+      .shake {
+        animation: shake 300ms ease;
+      }
+
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+      }
+
+      /* Unlocked Dashboard Elements */
+      .parent-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 16px;
+        background: rgba(35, 134, 54, 0.08);
+        border-bottom: 1px solid rgba(35, 134, 54, 0.2);
+        color: #1a7f37;
+        font-size: 11px;
+        font-weight: 600;
+      }
+
+      .btn-lock-mini {
+        padding: 4px 9px;
+        border: 1px solid rgba(26, 127, 55, 0.3);
+        border-radius: 6px;
+        background: #fff;
+        color: #1a7f37;
+        font: 600 10px Inter, sans-serif;
+        cursor: pointer;
+        min-height: 24px;
+      }
+
+      .btn-lock-mini:hover {
+        background: #eefbf1;
+      }
+
       .summary {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 8px;
-        padding: 14px 16px 2px;
+        padding: 12px 16px 2px;
       }
 
       .metric {
@@ -143,7 +356,7 @@
       }
 
       .workspace {
-        padding: 12px 16px 16px;
+        padding: 12px 16px 14px;
       }
 
       .section-heading {
@@ -168,12 +381,12 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 8px;
-        margin-bottom: 15px;
+        margin-bottom: 12px;
       }
 
       button {
-        min-height: 44px;
-        padding: 9px 12px;
+        min-height: 40px;
+        padding: 8px 12px;
         border: 1px solid var(--line);
         border-radius: 9px;
         color: var(--ink);
@@ -192,11 +405,6 @@
         transform: translateY(1px);
       }
 
-      button:focus-visible {
-        outline: 3px solid rgba(241, 90, 36, 0.3);
-        outline-offset: 2px;
-      }
-
       #export-pdf {
         border-color: var(--accent);
         color: #fff;
@@ -210,7 +418,7 @@
 
       #clear {
         grid-column: 1 / -1;
-        min-height: 36px;
+        min-height: 32px;
         border-color: transparent;
         color: var(--muted);
         background: transparent;
@@ -230,14 +438,14 @@
       #list {
         display: grid;
         gap: 9px;
-        max-height: 315px;
+        max-height: 270px;
         overflow: auto;
         padding-right: 2px;
       }
 
       .row {
         position: relative;
-        padding: 13px 13px 12px 16px;
+        padding: 12px 12px 11px 15px;
         overflow: hidden;
         border: 1px solid var(--line);
         border-radius: 11px;
@@ -277,11 +485,11 @@
 
       .severity {
         flex: none;
-        padding: 4px 7px;
+        padding: 3px 6px;
         border-radius: 99px;
         color: var(--amber);
         background: var(--amber-soft);
-        font: 700 10px/1 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font: 700 9px/1 Inter, sans-serif;
         letter-spacing: 0.06em;
         text-transform: uppercase;
       }
@@ -292,25 +500,64 @@
       }
 
       .meta {
-        margin-top: 5px;
+        margin-top: 4px;
         color: var(--muted);
-        font: 500 11px/1.3 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font: 500 11px/1.3 Inter, sans-serif;
       }
 
       .message {
-        margin: 10px 0 0;
+        margin: 8px 0 0;
         color: #303438;
         font-size: 12px;
-        line-height: 1.5;
+        line-height: 1.45;
         white-space: pre-wrap;
         overflow-wrap: anywhere;
+      }
+
+      .row-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dashed var(--line);
+      }
+
+      .btn-view-ss {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        min-height: 26px;
+        padding: 3px 8px;
+        border: 1px solid #dcdfe3;
+        border-radius: 6px;
+        color: #374151;
+        background: #f9fafb;
+        font: 600 10px Inter, sans-serif;
+        cursor: pointer;
+      }
+
+      .btn-view-ss:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-soft);
+      }
+
+      .btn-view-ss svg {
+        width: 13px;
+        height: 13px;
+      }
+
+      .no-ss-badge {
+        font-size: 10px;
+        color: var(--muted);
       }
 
       .empty {
         display: grid;
         justify-items: center;
         gap: 6px;
-        padding: 27px 20px;
+        padding: 24px 16px;
         border: 1px dashed #d1d2d0;
         border-radius: 11px;
         color: var(--muted);
@@ -334,46 +581,29 @@
         font-weight: 700;
       }
 
-      .row-actions {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-top: 8px;
-        padding-top: 8px;
-        border-top: 1px dashed var(--line);
+      .parent-footer {
+        padding: 8px 16px 14px;
+        border-top: 1px solid var(--line);
+        background: #fafaf9;
+        text-align: center;
       }
 
-      .btn-view-ss {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        min-height: 28px;
-        padding: 4px 10px;
-        border: 1px solid #dcdfe3;
-        border-radius: 6px;
-        color: #374151;
-        background: #f9fafb;
-        font: 600 11px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        cursor: pointer;
-        transition: border-color 150ms ease, background 150ms ease, color 150ms ease;
-      }
-
-      .btn-view-ss:hover {
-        border-color: var(--accent);
-        color: var(--accent);
-        background: var(--accent-soft);
-      }
-
-      .btn-view-ss svg {
-        width: 14px;
-        height: 14px;
-      }
-
-      .no-ss-badge {
-        font-size: 10px;
+      .btn-danger-link {
+        border: none;
+        background: transparent;
         color: var(--muted);
+        font-size: 11px;
+        font-weight: 500;
+        cursor: pointer;
+        padding: 4px 8px;
       }
 
+      .btn-danger-link:hover {
+        color: var(--red);
+        text-decoration: underline;
+      }
+
+      /* Modals */
       .modal-overlay {
         position: fixed;
         inset: 0;
@@ -491,9 +721,8 @@
         border-radius: 7px;
         color: #ffffff;
         background: var(--accent);
-        font: 600 11px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font: 600 11px Inter, sans-serif;
         text-decoration: none;
-        transition: background 150ms ease;
       }
 
       .modal-download-btn:hover {
@@ -514,6 +743,49 @@
         background: #f0f0ee;
       }
 
+      .reset-modal-body {
+        padding: 16px;
+      }
+
+      .reset-warning {
+        margin: 0 0 12px;
+        font-size: 12px;
+        line-height: 1.4;
+        color: #6e7781;
+      }
+
+      .reset-modal-body input {
+        width: 100%;
+        min-height: 38px;
+        padding: 8px 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        font: inherit;
+        font-size: 12px;
+        margin-bottom: 12px;
+      }
+
+      .reset-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+
+      .btn-danger {
+        min-height: 32px;
+        padding: 6px 14px;
+        border: 1px solid var(--red);
+        border-radius: 7px;
+        background: var(--red);
+        color: #fff;
+        font: 600 11px Inter, sans-serif;
+        cursor: pointer;
+      }
+
+      .btn-danger:hover {
+        background: #9b1c13;
+      }
+
       @media (prefers-reduced-motion: reduce) {
         button, .modal-content {
           transition: none;
@@ -524,7 +796,9 @@
   </head>
   <body>
     <header class="hero">
-      <div class="eyebrow">Local safety console</div>
+      <div class="eyebrow-container">
+        <div id="hero-eyebrow" class="eyebrow">Local Safety Console</div>
+      </div>
       <div class="brand">
         <div class="brand-mark">
           <img src="./assets/iitr-ropar-logo.png" alt="Indian Institute of Technology Ropar logo" />
@@ -533,23 +807,71 @@
       </div>
       <p class="subtitle">Incoming WhatsApp messages · on-device detection</p>
     </header>
-    <section class="summary" aria-label="Incident summary">
-      <div class="metric"><span class="metric-value" id="incident-count">0</span><span class="metric-label">Flagged</span></div>
-      <div class="metric"><span class="metric-value" id="high-count">0</span><span class="metric-label">High risk</span></div>
-      <div class="metric"><span class="metric-value">LOCAL</span><span class="metric-label">Processing</span></div>
-    </section>
-    <main class="workspace">
-      <div class="section-heading">
-        <h2>Incident log</h2>
-        <span>Newest first</span>
+
+    <!-- State 1: Unconfigured View -->
+    <div id="view-unconfigured" class="view-pane hidden">
+      <div class="state-card">
+        <div class="state-icon">⚙️</div>
+        <h3>Setup Required</h3>
+        <p>SurakshaNet is installed but not configured. Set up a master password to prevent unauthorized tampering and enable full protection.</p>
+        <button id="btn-launch-setup" class="btn-primary" type="button">Launch Parent Setup</button>
       </div>
-      <div class="actions" aria-label="Incident actions">
-        <button id="export-pdf" type="button">Export PDF</button>
-        <button id="export" type="button">Export JSON</button>
-        <button id="clear" type="button">Clear local incidents</button>
+    </div>
+
+    <!-- State 2: Child Protection Mode (Locked) -->
+    <div id="view-locked" class="view-pane hidden">
+      <div class="state-card">
+        <div class="status-shield">🛡️</div>
+        <h3>Protection Active</h3>
+        <p>SurakshaNet is actively monitoring WhatsApp Web 24/7. Toxic messages and evidence are safely captured on-device.</p>
+        <div class="channel-pill">
+          <span class="pulse-dot"></span> WhatsApp Web: Monitored
+        </div>
       </div>
-      <div id="list" aria-live="polite"></div>
-    </main>
+
+      <div class="unlock-box">
+        <h4>Parent Portal Access</h4>
+        <p>Enter your master password to unlock evidence logs, screenshots, and export options.</p>
+        <form id="form-unlock">
+          <div class="unlock-input-row">
+            <input id="unlock-password" type="password" placeholder="Master Password" required autocomplete="current-password" />
+            <button id="btn-unlock" class="btn-accent-sm" type="submit">Unlock</button>
+          </div>
+          <div id="unlock-error" class="error-text hidden"></div>
+        </form>
+      </div>
+    </div>
+
+    <!-- State 3: Parent Mode (Unlocked Dashboard) -->
+    <div id="view-unlocked" class="view-pane hidden">
+      <div class="parent-bar">
+        <span>👨‍👩‍👧 Parent Mode Unlocked</span>
+        <button id="btn-lock" class="btn-lock-mini" type="button">🔒 Lock Session</button>
+      </div>
+
+      <section class="summary" aria-label="Incident summary">
+        <div class="metric"><span class="metric-value" id="incident-count">0</span><span class="metric-label">Flagged</span></div>
+        <div class="metric"><span class="metric-value" id="high-count">0</span><span class="metric-label">High risk</span></div>
+        <div class="metric"><span class="metric-value">LOCAL</span><span class="metric-label">Processing</span></div>
+      </section>
+
+      <main class="workspace">
+        <div class="section-heading">
+          <h2>Incident log</h2>
+          <span>Newest first</span>
+        </div>
+        <div class="actions" aria-label="Incident actions">
+          <button id="export-pdf" type="button">Export PDF</button>
+          <button id="export" type="button">Export JSON</button>
+          <button id="clear" type="button">Clear local incidents</button>
+        </div>
+        <div id="list" aria-live="polite"></div>
+      </main>
+
+      <footer class="parent-footer">
+        <button id="btn-logout-modal" class="btn-danger-link" type="button">Reset Account / Logout</button>
+      </footer>
+    </div>
 
     <!-- Screenshot Preview Modal -->
     <div id="modal-overlay" class="modal-overlay hidden" aria-hidden="true">
@@ -567,6 +889,27 @@
         <div class="modal-footer">
           <a id="modal-download" class="modal-download-btn" href="#" download="surakshanet-evidence.jpg">Download Image</a>
           <button id="modal-dismiss" class="modal-secondary-btn" type="button">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div id="reset-modal-overlay" class="modal-overlay hidden" aria-hidden="true">
+      <div class="modal-content" style="max-width: 340px;">
+        <div class="modal-header">
+          <h3>Reset Parental Account</h3>
+          <button id="reset-modal-close" class="modal-close-btn" type="button">&times;</button>
+        </div>
+        <div class="reset-modal-body">
+          <p class="reset-warning">⚠️ Resetting clears parental credentials and returns SurakshaNet to the unconfigured state. Please enter your master password to confirm.</p>
+          <form id="form-reset-confirm">
+            <input id="reset-confirm-password" type="password" placeholder="Confirm Master Password" required />
+            <div id="reset-error" class="error-text hidden"></div>
+            <div class="reset-actions">
+              <button id="btn-reset-cancel" class="modal-secondary-btn" type="button">Cancel</button>
+              <button id="btn-reset-submit" class="btn-danger" type="submit">Confirm Reset</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

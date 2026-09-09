@@ -12,6 +12,7 @@
     "default_popup": "popup.html",
     "default_title": "SurakshaNet"
   },
+  "options_page": "auth.html",
   "background": {
     "service_worker": "sw.js",
     "type": "module"

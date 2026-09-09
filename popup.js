@@ -1,10 +1,38 @@
+import {
+  isAccountSetup,
+  isParentSessionActive,
+  loginParent,
+  lockSession,
+  logoutParent,
+} from './auth_manager.js';
 import { listIncidents, clearIncidents, exportJSON } from './store.js';
 import { exportIncidentsPDF } from './pdf_exporter.js';
 
+// Views & Header
+const heroEyebrow = document.getElementById('hero-eyebrow');
+const viewUnconfigured = document.getElementById('view-unconfigured');
+const viewLocked = document.getElementById('view-locked');
+const viewUnlocked = document.getElementById('view-unlocked');
+
+// Unconfigured View
+const btnLaunchSetup = document.getElementById('btn-launch-setup');
+
+// Locked View
+const formUnlock = document.getElementById('form-unlock');
+const unlockPassword = document.getElementById('unlock-password');
+const unlockError = document.getElementById('unlock-error');
+const btnUnlock = document.getElementById('btn-unlock');
+
+// Unlocked View Controls
+const btnLock = document.getElementById('btn-lock');
 const listEl = document.getElementById('list');
 const countEl = document.getElementById('incident-count');
 const highCountEl = document.getElementById('high-count');
+const btnExport = document.getElementById('export');
+const btnExportPdf = document.getElementById('export-pdf');
+const btnClear = document.getElementById('clear');
 
+// Screenshot Modal
 const modalOverlay = document.getElementById('modal-overlay');
 const modalImg = document.getElementById('modal-img');
 const modalTitle = document.getElementById('modal-title');
@@ -13,6 +41,25 @@ const modalClose = document.getElementById('modal-close');
 const modalDismiss = document.getElementById('modal-dismiss');
 const modalDownload = document.getElementById('modal-download');
 
+// Reset Modal
+const btnLogoutModal = document.getElementById('btn-logout-modal');
+const resetModalOverlay = document.getElementById('reset-modal-overlay');
+const resetModalClose = document.getElementById('reset-modal-close');
+const btnResetCancel = document.getElementById('btn-reset-cancel');
+const formResetConfirm = document.getElementById('form-reset-confirm');
+const resetConfirmPassword = document.getElementById('reset-confirm-password');
+const resetError = document.getElementById('reset-error');
+const btnResetSubmit = document.getElementById('btn-reset-submit');
+
+function formatTimestamp(value) {
+  try {
+    return new Date(value).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+  } catch {
+    return 'Unknown time';
+  }
+}
+
+// ---------------- Screenshot Modal Handlers ----------------
 function openScreenshotModal(item) {
   if (!item.screenshot) return;
   modalImg.src = item.screenshot;
@@ -35,19 +82,54 @@ modalDismiss.addEventListener('click', closeScreenshotModal);
 modalOverlay.addEventListener('click', (e) => {
   if (e.target === modalOverlay) closeScreenshotModal();
 });
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && !modalOverlay.classList.contains('hidden')) {
-    closeScreenshotModal();
+
+// ---------------- Reset Modal Handlers ----------------
+function openResetModal() {
+  resetConfirmPassword.value = '';
+  resetError.classList.add('hidden');
+  resetError.textContent = '';
+  resetModalOverlay.classList.remove('hidden');
+  resetModalOverlay.setAttribute('aria-hidden', 'false');
+  resetConfirmPassword.focus();
+}
+
+function closeResetModal() {
+  resetModalOverlay.classList.add('hidden');
+  resetModalOverlay.setAttribute('aria-hidden', 'true');
+}
+
+btnLogoutModal.addEventListener('click', openResetModal);
+resetModalClose.addEventListener('click', closeResetModal);
+btnResetCancel.addEventListener('click', closeResetModal);
+resetModalOverlay.addEventListener('click', (e) => {
+  if (e.target === resetModalOverlay) closeResetModal();
+});
+
+formResetConfirm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  resetError.classList.add('hidden');
+  btnResetSubmit.disabled = true;
+
+  const password = resetConfirmPassword.value;
+  try {
+    await logoutParent(password);
+    closeResetModal();
+    await updateView();
+  } catch (err) {
+    resetError.textContent = err?.message || 'Incorrect master password.';
+    resetError.classList.remove('hidden');
+  } finally {
+    btnResetSubmit.disabled = false;
   }
 });
 
-function formatTimestamp(value) {
-  try {
-    return new Date(value).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
-  } catch {
-    return 'Unknown time';
+// Global Keyboard Handler
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (!modalOverlay.classList.contains('hidden')) closeScreenshotModal();
+    if (!resetModalOverlay.classList.contains('hidden')) closeResetModal();
   }
-}
+});
 
 function cameraIcon() {
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -118,7 +200,7 @@ function row(item) {
   return article;
 }
 
-async function render() {
+async function renderIncidents() {
   const items = await listIncidents();
   countEl.textContent = items.length;
   highCountEl.textContent = items.filter((item) => item.severity === 'high').length;
@@ -133,7 +215,75 @@ async function render() {
   items.forEach((i) => listEl.appendChild(row(i)));
 }
 
-document.getElementById('export').onclick = async () => {
+// ---------------- View Management ----------------
+async function updateView() {
+  const setup = await isAccountSetup();
+  if (!setup) {
+    heroEyebrow.textContent = 'Setup Required';
+    heroEyebrow.classList.remove('unlocked');
+    viewUnconfigured.classList.remove('hidden');
+    viewLocked.classList.add('hidden');
+    viewUnlocked.classList.add('hidden');
+    return;
+  }
+
+  const active = await isParentSessionActive();
+  if (!active) {
+    heroEyebrow.textContent = 'Child Protection Active';
+    heroEyebrow.classList.remove('unlocked');
+    viewUnconfigured.classList.add('hidden');
+    viewLocked.classList.remove('hidden');
+    viewUnlocked.classList.add('hidden');
+    unlockPassword.value = '';
+    unlockError.classList.add('hidden');
+    return;
+  }
+
+  heroEyebrow.textContent = 'Parent Mode Active';
+  heroEyebrow.classList.add('unlocked');
+  viewUnconfigured.classList.add('hidden');
+  viewLocked.classList.add('hidden');
+  viewUnlocked.classList.remove('hidden');
+  await renderIncidents();
+}
+
+// ---------------- Event Listeners ----------------
+btnLaunchSetup.addEventListener('click', () => {
+  chrome.tabs.create({ url: chrome.runtime.getURL('auth.html') });
+});
+
+formUnlock.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  unlockError.classList.add('hidden');
+  btnUnlock.disabled = true;
+  btnUnlock.textContent = '...';
+
+  const password = unlockPassword.value;
+  try {
+    const success = await loginParent(password);
+    if (!success) {
+      unlockError.textContent = 'Incorrect master password.';
+      unlockError.classList.remove('hidden');
+      formUnlock.classList.add('shake');
+      setTimeout(() => formUnlock.classList.remove('shake'), 350);
+      return;
+    }
+    await updateView();
+  } catch (err) {
+    unlockError.textContent = err?.message || 'Login failed.';
+    unlockError.classList.remove('hidden');
+  } finally {
+    btnUnlock.disabled = false;
+    btnUnlock.textContent = 'Unlock';
+  }
+});
+
+btnLock.addEventListener('click', async () => {
+  await lockSession();
+  await updateView();
+});
+
+btnExport.onclick = async () => {
   const url = URL.createObjectURL(new Blob([await exportJSON()], { type: 'application/json' }));
   Object.assign(document.createElement('a'), {
     href: url,
@@ -142,7 +292,7 @@ document.getElementById('export').onclick = async () => {
   URL.revokeObjectURL(url);
 };
 
-document.getElementById('export-pdf').onclick = async (event) => {
+btnExportPdf.onclick = async (event) => {
   const button = event.currentTarget;
   button.disabled = true;
   try {
@@ -157,10 +307,11 @@ document.getElementById('export-pdf').onclick = async (event) => {
   }
 };
 
-document.getElementById('clear').onclick = async () => {
+btnClear.onclick = async () => {
   if (!confirm('Clear all local incidents?')) return;
   await clearIncidents();
-  render();
+  renderIncidents();
 };
 
-render();
+// Initialize View on load
+updateView();

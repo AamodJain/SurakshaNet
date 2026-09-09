@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SurakshaNet — Parental Protection Portal</title>
+    <style>
+      :root {
+        color-scheme: dark light;
+        --navy-dark: #0f1115;
+        --navy-card: #181b20;
+        --navy-input: #22262d;
+        --navy-border: #2d333b;
+        --text-main: #f0f3f6;
+        --text-muted: #8b949e;
+        --accent: #f15a24;
+        --accent-hover: #d94917;
+        --accent-soft: rgba(241, 90, 36, 0.15);
+        --green: #238636;
+        --red: #da3633;
+        --red-soft: rgba(218, 54, 51, 0.15);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        font: 14px/1.5 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: radial-gradient(circle at top right, #1f242c, var(--navy-dark) 85%);
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 16px;
+      }
+
+      .card {
+        width: 100%;
+        max-width: 460px;
+        background: var(--navy-card);
+        border: 1px solid var(--navy-border);
+        border-radius: 16px;
+        box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+        animation: fadeIn 300ms ease-out;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .card-header {
+        position: relative;
+        padding: 28px 28px 22px;
+        background: #14171c;
+        border-bottom: 1px solid var(--navy-border);
+      }
+
+      .card-header::after {
+        content: "";
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 120px;
+        height: 3px;
+        background: var(--accent);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .brand-logo {
+        width: 48px;
+        height: 48px;
+        background: #fff;
+        border-radius: 12px;
+        padding: 2px;
+        display: grid;
+        place-items: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
+
+      .brand-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 10px;
+      }
+
+      .brand-text h1 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: #fff;
+      }
+
+      .brand-text p {
+        margin: 2px 0 0;
+        font-size: 11px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .tabs {
+        display: flex;
+        border-bottom: 1px solid var(--navy-border);
+        background: #121519;
+      }
+
+      .tab-btn {
+        flex: 1;
+        padding: 14px 12px;
+        border: none;
+        background: transparent;
+        color: var(--text-muted);
+        font: 600 12px Inter, sans-serif;
+        cursor: pointer;
+        transition: all 180ms ease;
+        border-bottom: 2px solid transparent;
+      }
+
+      .tab-btn:hover {
+        color: var(--text-main);
+      }
+
+      .tab-btn.active {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+        background: rgba(241, 90, 36, 0.06);
+      }
+
+      .card-body {
+        padding: 24px 28px;
+      }
+
+      .form-pane {
+        display: none;
+      }
+
+      .form-pane.active {
+        display: block;
+      }
+
+      .form-group {
+        margin-bottom: 18px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #d0d7de;
+      }
+
+      input[type="email"],
+      input[type="password"],
+      input[type="text"] {
+        width: 100%;
+        padding: 10px 14px;
+        background: var(--navy-input);
+        border: 1px solid var(--navy-border);
+        border-radius: 8px;
+        color: var(--text-main);
+        font: inherit;
+        font-size: 13px;
+        transition: border-color 150ms ease, box-shadow 150ms ease;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+      }
+
+      .help-text {
+        margin-top: 5px;
+        font-size: 11px;
+        color: var(--text-muted);
+      }
+
+      .notice-box {
+        display: flex;
+        gap: 10px;
+        padding: 12px 14px;
+        margin-bottom: 20px;
+        background: rgba(241, 90, 36, 0.08);
+        border: 1px solid rgba(241, 90, 36, 0.25);
+        border-radius: 9px;
+        font-size: 12px;
+        color: #ffc2af;
+      }
+
+      .notice-box svg {
+        flex: none;
+        width: 18px;
+        height: 18px;
+        color: var(--accent);
+        margin-top: 2px;
+      }
+
+      .btn-primary {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        background: var(--accent);
+        color: #fff;
+        font: 600 13px Inter, sans-serif;
+        cursor: pointer;
+        transition: background 150ms ease, transform 150ms ease;
+      }
+
+      .btn-primary:hover {
+        background: var(--accent-hover);
+      }
+
+      .btn-primary:active {
+        transform: translateY(1px);
+      }
+
+      .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: wait;
+      }
+
+      .alert {
+        display: none;
+        padding: 10px 14px;
+        margin-bottom: 16px;
+        border-radius: 8px;
+        font-size: 12px;
+      }
+
+      .alert.error {
+        display: block;
+        background: var(--red-soft);
+        border: 1px solid var(--red);
+        color: #ff8b88;
+      }
+
+      .alert.success {
+        display: block;
+        background: rgba(35, 134, 54, 0.15);
+        border: 1px solid var(--green);
+        color: #7ee787;
+      }
+
+      .card-footer {
+        padding: 14px 28px;
+        background: #121519;
+        border-top: 1px solid var(--navy-border);
+        text-align: center;
+        font-size: 11px;
+        color: var(--text-muted);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <header class="card-header">
+        <div class="brand">
+          <div class="brand-logo">
+            <img src="./assets/iitr-ropar-logo.png" alt="IIT Ropar logo" />
+          </div>
+          <div class="brand-text">
+            <h1>SurakshaNet</h1>
+            <p>Parental Safety & Control Portal</p>
+          </div>
+        </div>
+      </header>
+
+      <nav class="tabs" aria-label="Auth tabs">
+        <button id="tab-setup" class="tab-btn active" type="button">Setup Parent Account</button>
+        <button id="tab-login" class="tab-btn" type="button">Unlock Parent Portal</button>
+      </nav>
+
+      <div class="card-body">
+        <div id="alert-msg" class="alert"></div>
+
+        <!-- Setup Pane -->
+        <form id="form-setup" class="form-pane active">
+          <div class="notice-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            <div>
+              <strong>On-Device Protection:</strong> Set a master password to prevent unauthorized modifications or tampering by children.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="setup-email">Parent Email Address</label>
+            <input id="setup-email" type="email" placeholder="parent@example.com" required autocomplete="email" />
+            <div class="help-text">Used for identification and cross-device sync.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="setup-password">Parent Master Password</label>
+            <input id="setup-password" type="password" placeholder="At least 6 characters" required autocomplete="new-password" minlength="6" />
+          </div>
+
+          <div class="form-group">
+            <label for="setup-confirm">Confirm Master Password</label>
+            <input id="setup-confirm" type="password" placeholder="Re-enter master password" required autocomplete="new-password" minlength="6" />
+          </div>
+
+          <button id="btn-setup" class="btn-primary" type="submit">Activate Parental Protection</button>
+        </form>
+
+        <!-- Login / Unlock Pane -->
+        <form id="form-login" class="form-pane">
+          <div class="form-group">
+            <label for="login-password">Enter Master Password</label>
+            <input id="login-password" type="password" placeholder="Master password" required autocomplete="current-password" />
+            <div class="help-text">Unlock to view evidence records, screenshots, and export reports.</div>
+          </div>
+
+          <button id="btn-login" class="btn-primary" type="submit">Unlock Parent Dashboard</button>
+        </form>
+      </div>
+
+      <footer class="card-footer">
+        SurakshaNet · 100% Local AI Inference & Zero-Knowledge Security
+      </footer>
+    </div>
+
+    <script type="module" src="./auth.js"></script>
+  </body>
+</html>
