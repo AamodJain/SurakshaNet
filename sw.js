@@ -95,6 +95,21 @@ async function classify(text) {
   return result;
 }
 
+async function captureScreen(windowId) {
+  try {
+    if (typeof windowId !== 'number') return null;
+    const dataUrl = await chrome.tabs.captureVisibleTab(windowId, {
+      format: 'jpeg',
+      quality: 60,
+    });
+    log('screenshot:captured', { windowId, bytes: dataUrl?.length || 0 });
+    return dataUrl;
+  } catch (error) {
+    log('screenshot:failed', { windowId, error: String(error?.message || error) });
+    return null;
+  }
+}
+
 async function drain() {
   if (busy) return;
   busy = true;
@@ -107,21 +122,25 @@ async function drain() {
         text: debugText(job.text),
         textLength: job.text.length,
         contact: job.contact,
+        windowId: job.windowId,
       });
       try {
         const result = await classify(job.text);
         if (result.flagged) {
+          const screenshot = await captureScreen(job.windowId);
           const saved = await saveIncident({
             text: job.text,
             contact: job.contact,
             score: result.score,
             severity: result.severity,
+            screenshot,
           });
           log('incident:save', {
             created: Boolean(saved),
             id: saved?.id?.slice(0, 12) || null,
             text: debugText(job.text),
             contact: job.contact,
+            hasScreenshot: Boolean(screenshot),
           });
         }
         job.resolve(result);
@@ -140,15 +159,16 @@ async function drain() {
   }
 }
 
-function enqueue(text, contact) {
+function enqueue(text, contact, windowId) {
   log('queue:enqueue', {
     text: debugText(text),
     pending: queue.length + 1,
     textLength: text.length,
     contact,
+    windowId,
   });
   return new Promise((resolve, reject) => {
-    queue.push({ text, contact, resolve, reject });
+    queue.push({ text, contact, windowId, resolve, reject });
     drain();
   });
 }
@@ -163,7 +183,7 @@ chrome.runtime.onStartup.addListener(() => {
 });
 chrome.runtime.onSuspend.addListener(() => log('runtime:suspend'));
 
-chrome.runtime.onMessage.addListener((msg, _s, sendResponse) => {
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg?.type !== 'ANALYZE') {
     log('message:ignored', { type: msg?.type || null });
     return false;
@@ -173,12 +193,14 @@ chrome.runtime.onMessage.addListener((msg, _s, sendResponse) => {
     sendResponse({ flagged: false, error: 'Message text is required.' });
     return false;
   }
+  const windowId = sender.tab?.windowId ?? null;
   log('message:analyze', {
     text: debugText(msg.text),
     textLength: msg.text.length,
     contact: msg.contact,
+    windowId,
   });
-  enqueue(msg.text, msg.contact)
+  enqueue(msg.text, msg.contact, windowId)
     .then((r) => sendResponse(r))
     .catch((error) => {
       logError('message:analyze:failed', error, {

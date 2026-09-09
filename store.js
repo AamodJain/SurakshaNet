@@ -7,12 +7,12 @@ export async function sha256(text) {
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
-export async function saveIncident({ text, contact, score, severity }) {
+export async function saveIncident({ text, contact, score, severity, screenshot = null }) {
   const chat = typeof contact === 'string' && contact.trim() ? contact.trim() : 'Unknown chat';
   const id = await sha256(`${chat}\n${text.trim().toLowerCase()}`);
   const { [KEY]: list = [] } = await chrome.storage.local.get(KEY);
   if (list.some((x) => x.id === id)) return null;
-  const row = { id, ts: new Date().toISOString(), contact: chat, score, severity, text, screenshot: null };
+  const row = { id, ts: new Date().toISOString(), contact: chat, score, severity, text, screenshot };
   list.unshift(row);
   await chrome.storage.local.set({ [KEY]: list.slice(0, CAP) });
   return row;

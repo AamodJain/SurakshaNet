@@ -20,7 +20,9 @@ function copyAssetsPlugin() {
       }
       const modelSrc = path.resolve(__dirname, 'assets/models');
       const modelDest = path.resolve(distDir, 'assets/models');
-      fs.cpSync(modelSrc, modelDest, { recursive: true });
+      if (fs.existsSync(modelSrc)) {
+        fs.cpSync(modelSrc, modelDest, { recursive: true });
+      }
     },
   };
 }

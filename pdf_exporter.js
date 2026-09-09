@@ -114,7 +114,26 @@ export async function exportIncidentsPDF(incidents) {
     doc.setTextColor(110, 110, 110);
     doc.text(`ID: ${String(incident.id || '').slice(0, 24)}`, margin + 2, y);
     doc.setTextColor(0, 0, 0);
-    y += 10;
+    y += 7;
+
+    if (incident.screenshot) {
+      const imgWidth = Math.min(contentWidth - 8, 120);
+      const imgHeight = (imgWidth * 9) / 16;
+      pageBreak(imgHeight + 10);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(80, 80, 80);
+      doc.text('Captured Evidence Screen:', margin + 2, y);
+      y += 4;
+      try {
+        doc.addImage(incident.screenshot, 'JPEG', margin + 4, y, imgWidth, imgHeight);
+        y += imgHeight + 6;
+      } catch (err) {
+        console.error('Failed to embed screenshot in PDF', err);
+      }
+    }
+
+    y += 5;
   });
 
   const pages = doc.internal.getNumberOfPages();
